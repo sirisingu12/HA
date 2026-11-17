@@ -1,42 +1,204 @@
 
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Hospital Appointment System</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #eaf4ff;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            background: white;
+            max-width: 650px;
+            margin: auto;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px #b5cde0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #087eae;
+        }
+
+        h3 {
+            color: #087eae;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #087eae;
+            color: white;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #045477;
+        }
+
+        .appointment {
+            background: #e1f5fe;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        .cancel {
+            background: #e74c3c;
+            margin-top: 8px;
+        }
+
+        #message {
+            color: green;
+            text-align: center;
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Hospital Appointment System</h2>
 
-    <form>
-        Patient Name:
-        <input type="text" required><br><br>
+<div class="container">
 
-        Age:
-        <input type="number" required><br><br>
+    <h1>🏥 City Care Hospital</h1>
+    <p style="text-align:center">Book Your Doctor Appointment</p>
 
-        Gender:
-        <select>
+    <h3>Patient Details</h3>
+
+    <form id="appointmentForm">
+
+        <label>Patient Name</label>
+        <input type="text" id="name" placeholder="Enter name" required>
+
+        <label>Age</label>
+        <input type="number" id="age" min="1" max="120" required>
+
+        <label>Gender</label>
+        <select id="gender">
             <option>Male</option>
             <option>Female</option>
             <option>Other</option>
-        </select><br><br>
+        </select>
 
-        Phone Number:
-        <input type="tel" required><br><br>
+        <label>Phone Number</label>
+        <input type="tel" id="phone" pattern="[0-9]{10}"
+               placeholder="10 digit mobile number" required>
 
-        Doctor:
-        <select>
-            <option>Cardiologist</option>
-            <option>Dentist</option>
-            <option>General Physician</option>
-            <option>Dermatologist</option>
-        </select><br><br>
+        <label>Select Doctor</label>
+        <select id="doctor">
+            <option>Dr. Ravi - Cardiologist</option>
+            <option>Dr. Priya - Dermatologist</option>
+            <option>Dr. Kumar - Dentist</option>
+            <option>Dr. Anjali - General Physician</option>
+        </select>
 
-        Appointment Date:
-        <input type="date" required><br><br>
+        <label>Appointment Date</label>
+        <input type="date" id="date" required>
 
-        <input type="submit" value="Book Appointment">
-        <input type="reset" value="Clear">
+        <button type="submit">Book Appointment</button>
+        <button type="reset" style="background:#777">Clear</button>
+
     </form>
+
+    <h3 id="message"></h3>
+
+    <hr>
+
+    <h3>📋 Booked Appointments</h3>
+    <div id="appointments"></div>
+
+</div>
+
+<script>
+
+    let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+
+    document.getElementById("date").min =
+        new Date().toISOString().split("T")[0];
+
+    function displayBookings() {
+        let output = document.getElementById("appointments");
+        output.innerHTML = "";
+
+        if (bookings.length === 0) {
+            output.innerHTML = "No appointments booked yet.";
+            return;
+        }
+
+        bookings.forEach((b, index) => {
+            output.innerHTML += `
+                <div class="appointment">
+                    <b>${b.name}</b><br>
+                    Age: ${b.age}<br>
+                    Gender: ${b.gender}<br>
+                    Phone: ${b.phone}<br>
+                    Doctor: ${b.doctor}<br>
+                    Date: ${b.date}<br>
+                    <button class="cancel" onclick="cancelBooking(${index})">
+                        Cancel Appointment
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    document.getElementById("appointmentForm")
+    .addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+        let booking = {
+            name: document.getElementById("name").value,
+            age: document.getElementById("age").value,
+            gender: document.getElementById("gender").value,
+            phone: document.getElementById("phone").value,
+            doctor: document.getElementById("doctor").value,
+            date: document.getElementById("date").value
+        };
+
+        bookings.push(booking);
+
+        localStorage.setItem("bookings", JSON.stringify(bookings));
+
+        document.getElementById("message").innerText =
+            "Appointment booked successfully! 🎉";
+
+        this.reset();
+
+        displayBookings();
+    });
+
+    function cancelBooking(index) {
+        if (confirm("Are you sure you want to cancel?")) {
+            bookings.splice(index, 1);
+
+            localStorage.setItem("bookings", JSON.stringify(bookings));
+
+            document.getElementById("message").innerText =
+                "Appointment cancelled successfully.";
+
+            displayBookings();
+        }
+    }
+
+    displayBookings();
+
+</script>
+
 </body>
 </html>
